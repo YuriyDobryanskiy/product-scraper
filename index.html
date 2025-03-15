@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uk">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Парсер товарів</title>
+	</head>
+	<body>
+		<h1>Введіть ID товарів</h1>
+		<textarea
+			id="productIds"
+			rows="5"
+			cols="50"
+			placeholder="Введіть ID через кому (наприклад: 1133999, 1100731)"
+		></textarea>
+		<br />
+		<button onclick="scrapeProducts()">Отримати дані</button>
+		<div id="results"></div>
+
+		<script>
+			async function scrapeProducts() {
+				const input = document.getElementById('productIds').value
+				const productIds = input.split(',').map(id => id.trim())
+
+				try {
+					const response = await fetch('http://localhost:3000/scrape', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ productIds }),
+					})
+
+					const data = await response.json()
+					if (response.ok) {
+						console.log(JSON.stringify(data, null, 2)) // Виводимо дані в консоль у потрібному форматі
+						displayResults(data) // Опціонально відображаємо на сторінці
+					} else {
+						document.getElementById(
+							'results'
+						).innerHTML = `<p>Помилка: ${data.error}</p>`
+					}
+				} catch (error) {
+					document.getElementById(
+						'results'
+					).innerHTML = `<p>Помилка: ${error.message}</p>`
+				}
+			}
+
+			// Функція для відображення результатів на сторінці (опціонально)
+			function displayResults(products) {
+				const resultsDiv = document.getElementById('results')
+				resultsDiv.innerHTML =
+					'<pre>' + JSON.stringify(products, null, 2) + '</pre>'
+			}
+		</script>
+	</body>
+</html>
